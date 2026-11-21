@@ -259,3 +259,49 @@ footer .fbtns{display:flex;gap:8px;flex-wrap:wrap}
 </style>
 </head>
 <body>
+<!-- intro -->
+<div id="intro" role="dialog" aria-label="Welcome to CineKit">
+  <div class="bulbs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="logo" aria-hidden="true"><span>C</span><span>I</span><span>N</span><span>E</span><span>K</span><span>I</span><span>T</span></div>
+  <div class="tag">Movie night, sorted.</div>
+  <div class="bar" aria-hidden="true"><i></i></div>
+  <button class="skip" id="introSkip" type="button">Tap to skip</button>
+</div>
+
+<!-- header -->
+<header>
+  <div class="wrap hd">
+    <a class="brand" href="#top">
+      <span class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#241505" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.4" fill="#241505"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/></svg>
+      </span>
+      <span><b>CineKit</b><small>MOVIE NIGHT, SORTED</small></span>
+    </a>
+    <span class="sp"></span>
+    <span class="chip" id="hdChip">3 films in Nov</span>
+    <button class="btn btn-gold btn-sm" type="button" onclick="CineKit.scrollToId('picker')">Pick tonight</button>
+  </div>
+</header>
+
+<!-- hero -->
+<div class="hero" id="top">
+  <div class="photo" aria-hidden="true"><img src="{{HERO_IMG}}" alt=""></div>
+  <div class="shade" aria-hidden="true"></div>
+  <div class="wrap in">
+    <div class="eyebrow">Your home cinema &middot; Bengaluru</div>
+    <h1>Tonight, the film <em>picks itself.</em></h1>
+    <p class="lede">Stop scrolling. Answer four quick questions and CineKit rolls the reel on a film from your own list — Malayalam classics included. Popcorn optional, but recommended.</p>
+    <div class="cta">
+      <button class="btn btn-gold" type="button" onclick="CineKit.scrollToId('picker')">Roll the reel tonight</button>
+      <button class="btn btn-ghost" type="button" onclick="CineKit.scrollToId('watchlist')">Browse my list</button>
+    </div>
+    <div class="marquee" aria-hidden="true"><span>ADMIT ONE &nbsp;&middot;&nbsp; MALAYALAM CLASSICS &nbsp;&middot;&nbsp; POPCORN READY &nbsp;&middot;&nbsp; LIGHTS DOWN AT NINE &nbsp;&middot;&nbsp; NO SPOILERS &nbsp;&middot;&nbsp; ADMIT ONE &nbsp;&middot;&nbsp; MALAYALAM CLASSICS &nbsp;&middot;&nbsp; POPCORN READY &nbsp;&middot;&nbsp; LIGHTS DOWN AT NINE &nbsp;&middot;&nbsp; NO SPOILERS &nbsp;&middot;&nbsp;</span></div>
+    <div class="stats">
+      <div class="stat"><b id="stList">8</b><span>On your list</span></div>
+      <div class="stat"><b id="stWatched">3</b><span>Watched in Nov</span></div>
+      <div class="stat"><b id="stHours">7h 36m</b><span>Watched in Nov</span></div>
+      <div class="stat"><b id="stTonight">Not picked</b><span>Tonight&rsquo;s film</span></div>
+    </div>
+  </div>
+</div>
+<!-- @@NEXT@@ -->
