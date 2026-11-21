@@ -3,6 +3,7 @@
 Stop scrolling. Answer four quick questions and CineKit rolls the reel on a film from your own list — Malayalam classics included. Your watchlist lives on ticket stubs, tonight's film gets a countdown to lights-down, and every finished film lands in your movie diary with its stars.
 
 **Live:** https://abhiramunni.github.io/cinekit/
+Verified live 21 Nov 2026: intro, hero, tonight's screening, picker, watchlist, classics shelf, diary and guides all render; both photos load.
 
 ## What it does
 
