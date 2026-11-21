@@ -917,4 +917,80 @@ function addClassic(id){
   S.films.push({id:uid(),title:c.title,lang:c.lang,genre:c.genre,runtime:c.runtime,ott:c.ott,by:'Classics shelf',note:c.why,status:'want',rating:0,moods:c.moods.slice(),fam:c.fam,sample:false});
   save();renderAll();toast('\u201C'+c.title+'\u201D added to your list.');
 }
+/* ---------- watched log + chart ---------- */
+function renderLog(){
+  var box=$('logList');if(!box)return;
+  var w=watchedFilms().slice().sort(function(a,b){return (b.watchedDate||'')<(a.watchedDate||'')?-1:1;});
+  if(!w.length){box.innerHTML='<p class="small" style="color:#a68f6d">Nothing watched yet. Finish a film and it lands here with your stars.</p>';return;}
+  box.innerHTML=w.map(function(f){
+    var d=f.watchedDate?parseDate(f.watchedDate):new Date();
+    var stars='';for(var i=1;i<=5;i++)stars+=starSvg(f.rating>=i,14);
+    return '<div class="logrow"><div class="d"><b>'+d.getDate()+'</b><span>'+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+'</span></div>'+
+    '<div class="t"><b>'+esc(f.title)+'</b><span>'+esc(f.lang)+' \u00B7 '+fmtRuntime(f.runtime)+' \u00B7 <span style="color:var(--gold2)">'+stars+'</span></span></div>'+
+    '<button class="linkbtn grey" type="button" onclick="CineKit.removeFilm(\''+f.id+'\')">Remove</button></div>';
+  }).join('');
+}
+function drawChart(){
+  var cv=$('weekChart');if(!cv)return;
+  var ctx;try{ctx=cv.getContext('2d');}catch(e){return;}
+  if(!ctx)return;
+  var data=weekData();var W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  var max=180;var bw=26;var gap=(W-40-data.length*bw)/(data.length-1);
+  ctx.fillStyle='#a68f6d';ctx.font='11px Inter,sans-serif';ctx.textAlign='center';
+  data.forEach(function(d,i){
+    var x=20+i*(bw+gap);var h=Math.max(2,d.min/max*(H-46));
+    ctx.fillStyle=d.min>0?'#e2ab4a':'#3a2c1a';
+    ctx.beginPath();
+    if(ctx.roundRect){ctx.roundRect(x,H-28-h,bw,h,[5,5,0,0]);ctx.fill();}
+    else{ctx.fillRect(x,H-28-h,bw,h);}
+    ctx.fillStyle='#a68f6d';ctx.fillText(d.label,x+bw/2,H-10);
+    if(d.min>0){ctx.fillStyle='#f3d9a4';ctx.fillText(d.min+'m',x+bw/2,H-36-h);}
+  });
+  ctx.strokeStyle='#4a3a24';ctx.beginPath();ctx.moveTo(12,H-28);ctx.lineTo(W-8,H-28);ctx.stroke();
+}
+
+/* ---------- OTT + guides ---------- */
+function renderOtt(){
+  var g=$('ottGrid');if(!g)return;
+  g.innerHTML=OTT.map(function(o){return '<article class="ott"><h3>'+esc(o.name)+'</h3><div class="price">'+esc(o.price)+'</div><p>'+esc(o.note)+'</p></article>';}).join('');
+}
+function renderGuides(){
+  var g=$('guideGrid');if(!g)return;
+  g.innerHTML=GUIDES.map(function(x,i){return '<details class="guide"><summary><span class="n">'+(i+1)+'</span>'+esc(x.t)+'</summary><div class="body">'+esc(x.b)+'</div></details>';}).join('');
+}
+
+/* ---------- summary / samples / erase ---------- */
+function summaryText(){
+  var wm=watchedInMonth();var mm=monthMinutes();
+  var lines=['CineKit \u2014 my movie night, '+fmtDate(todayStr()),''];
+  lines.push('On my list: '+S.films.length+' films ('+S.films.filter(function(f){return f.status==='want';}).length+' to watch, '+S.films.filter(function(f){return f.status==='watching';}).length+' watching, '+watchedFilms().length+' watched).');
+  lines.push('Watched in '+['January','February','March','April','May','June','July','August','September','October','November','December'][new Date().getMonth()]+': '+wm.length+' films, '+fmtHours(mm)+', average rating '+(avgRating()?avgRating().toFixed(1):'\u2014')+'.');
+  if(S.tonight)lines.push('Tonight: '+S.tonight.title+' at '+S.tonight.start+'.');
+  lines.push('');
+  wm.forEach(function(f){lines.push('- '+f.title+' ('+f.lang+', '+fmtRuntime(f.runtime)+') \u2014 '+f.rating+'/5');});
+  return lines.join('\n');
+}
+function copySummary(){
+  var t=summaryText();
+  function done(){toast('Summary copied \u2014 paste it anywhere.');}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done,function(){fallbackCopy(t);done();});}
+  else{fallbackCopy(t);done();}
+}
+function fallbackCopy(t){var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);try{ta.select();document.execCommand('copy');}catch(e){}document.body.removeChild(ta);}
+function removeSamples(){
+  var before=S.films.length;
+  if(S.tonight){var tf=filmById(S.tonight.filmId);if(tf&&tf.sample)S.tonight=null;}
+  S.films=S.films.filter(function(f){return !f.sample;});
+  save();renderAll();
+  toast('Removed '+(before-S.films.length)+' sample film'+(before-S.films.length===1?'':'s')+'. Your own films stayed.');
+}
+var eraseArm=false;
+function eraseAll(){
+  if(!eraseArm){eraseArm=true;toast('Tap Erase everything once more to wipe your whole list.');setTimeout(function(){eraseArm=false;},4000);return;}
+  eraseArm=false;
+  try{window.localStorage.removeItem(KEY);}catch(e){}
+  S=freshState();S.films=[];save();renderAll();
+  toast('Everything erased. A fresh, empty list.');
+}
 <!-- @@NEXT@@ -->
