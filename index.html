@@ -1071,4 +1071,19 @@ function boot(){
   if(!coachDone)setTimeout(startCoach,4200);
 }
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',boot);}else{boot();}
-<!-- @@NEXT@@ -->
+/* ---------- public API ---------- */
+window.CineKit={
+  getState:function(){return S;},
+  CLASSICS:CLASSICS,OTT:OTT,GUIDES:GUIDES,MOODS:MOODS,TIMES:TIMES,LANGS:LANGS,WHOS:WHOS,SNACKS:SNACKS,
+  filterPool:filterPool,pickFilms:pickFilms,poolItems:poolItems,whyLine:whyLine,
+  fmtRuntime:fmtRuntime,fmtHours:fmtHours,fmtDate:fmtDate,minsToStart:minsToStart,
+  monthMinutes:monthMinutes,avgRating:avgRating,topGenre:topGenre,weekData:weekData,watchedInMonth:watchedInMonth,
+  timeBucket:timeBucket,todayStr:todayStr,
+  scrollToId:scrollToId,rollReel:rollReel,lockTonight:lockTonight,setPick:setPick,addClassic:addClassic,
+  toggleSnack:toggleSnack,setStart:setStart,clearTonight:clearTonight,finishTonight:finishTonight,
+  setStatus:setStatus,openRate:openRate,closeRate:closeRate,saveRating:saveRating,setRateStars:setRateStars,rateFilm:rateFilm,
+  removeFilm:removeFilm,addFilm:addFilm,clearAddForm:clearAddForm,setWlFilter:setWlFilter,
+  copySummary:copySummary,summaryText:summaryText,removeSamples:removeSamples,eraseAll:eraseAll,
+  startCoach:startCoach,coachNext:coachNext,coachSkip:coachSkip,skipIntro:skipIntro,
+  renderAll:renderAll
+};
