@@ -639,4 +639,72 @@ function safeScroll(el){try{if(el&&el.scrollIntoView)el.scrollIntoView({behavior
 function scrollToId(id){var el=document.getElementById(id);if(el)safeScroll(el);}
 function timeBucket(m){if(m==null||m==='')return 'any';m=+m;if(m<120)return 'short';if(m<=160)return 'medium';return 'long';}
 function monthKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+/* ---------- derived data ---------- */
+function watchedFilms(){return S.films.filter(function(f){return f.status==='watched';});}
+function watchedInMonth(d){d=d||new Date();var k=monthKey(d);return watchedFilms().filter(function(f){return f.watchedDate&&f.watchedDate.slice(0,7)===k;});}
+function monthMinutes(d){return watchedInMonth(d).reduce(function(a,f){return a+(+f.runtime||0);},0);}
+function avgRating(){var w=watchedFilms().filter(function(f){return f.rating>0;});if(!w.length)return 0;return Math.round(w.reduce(function(a,f){return a+f.rating;},0)/w.length*10)/10;}
+function topGenre(){var c={};watchedFilms().forEach(function(f){var g=(f.genre||'').split('-')[0];c[g]=(c[g]||0)+1;});var best='',n=0;for(var g in c){if(c[g]>n){n=c[g];best=g;}}return best||'\u2014';}
+function weekData(){var out=[];var now=new Date();for(var i=13;i>=0;i--){var d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-i);var key=todayStr(d);var min=0;watchedFilms().forEach(function(f){if(f.watchedDate===key)min+=(+f.runtime||0);});out.push({date:key,day:d.getDate(),label:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()],min:min});}return out;}
+function filmById(id){for(var i=0;i<S.films.length;i++)if(S.films[i].id===id)return S.films[i];return null;}
+function classicById(id){for(var i=0;i<CLASSICS.length;i++)if(CLASSICS[i].id===id)return CLASSICS[i];return null;}
+function onListTitle(t){t=t.toLowerCase();for(var i=0;i<S.films.length;i++)if(S.films[i].title.toLowerCase()===t)return true;return false;}
+function posterHue(f){var h=[['linear-gradient(150deg,#b4552d,#7a3418)'],['linear-gradient(150deg,#c98a2e,#8a5a12)'],['linear-gradient(150deg,#4a3826,#241a10)'],['linear-gradient(150deg,#cf6f42,#8a3b1d)'],['linear-gradient(150deg,#5f7a3a,#3c4d22)'],['linear-gradient(150deg,#8a3b1d,#5b2410)']];var s=0;for(var i=0;i<f.title.length;i++)s+=f.title.charCodeAt(i);return h[s%h.length][0];}
+
+/* ---------- render: stats ---------- */
+function renderStats(){
+  var want=S.films.filter(function(f){return f.status==='want';}).length;
+  var wm=watchedInMonth();var mm=monthMinutes();
+  $('stList').textContent=S.films.length;
+  $('stWatched').textContent=wm.length;
+  $('stHours').textContent=fmtHours(mm);
+  $('stTonight').textContent=S.tonight?S.tonight.title:'Not picked';
+  $('hdChip').textContent=wm.length+' film'+(wm.length===1?'':'s')+' in '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][new Date().getMonth()];
+  $('dgFilms').textContent=wm.length;
+  $('dgHours').textContent=fmtHours(mm);
+  $('dgAvg').textContent=avgRating()?avgRating().toFixed(1):'\u2014';
+  $('dgGenre').textContent=topGenre();
+}
+
+/* ---------- render: tonight stage ---------- */
+function renderTonight(){
+  var box=$('stageBox');
+  if(!S.tonight){
+    box.innerHTML='<div class="empty-stage"><div class="big">No film on the marquee yet.</div><p>Roll the reel below and tonight\u2019s film will appear here, with a countdown to lights-down.</p><div style="margin-top:16px"><button class="btn btn-gold" type="button" onclick="CineKit.scrollToId(\'picker\')">Pick tonight\u2019s film</button></div></div>';
+    return;
+  }
+  var f=filmById(S.tonight.filmId)||{title:S.tonight.title,lang:'',genre:'',runtime:null,ott:''};
+  var snacks=SNACKS.map(function(s){var on=S.tonight.snacks&&S.tonight.snacks[s.id];return '<button type="button" class="snack'+(on?' on':'')+'" data-snack="'+s.id+'" onclick="CineKit.toggleSnack(\''+s.id+'\')"><span class="box">'+(on?'<svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.5 4.8 9 10 3"/></svg>':'')+'</span>'+esc(s.label)+'</button>';}).join('');
+  box.innerHTML=
+   '<div class="top">'+
+   '<div class="poster"><div class="art" style="background:'+posterHue(f)+'">'+esc(f.title.charAt(0))+'</div><div class="cap">Tonight &middot; '+esc(todayStr()==S.tonight.date?'Today':fmtDate(S.tonight.date))+'</div></div>'+
+   '<div class="info"><div class="eyebrow">Now showing at home</div><h3>'+esc(f.title)+'</h3>'+
+   '<div class="meta">'+esc(f.lang||'')+(f.lang?' \u00B7 ':'')+esc(f.genre||'')+' \u00B7 '+fmtRuntime(f.runtime)+' \u00B7 '+esc(f.ott||'Not sure yet')+'</div>'+
+   (S.tonight.why?'<div class="why">'+esc(S.tonight.why)+'</div>':'')+
+   '<div class="cdrow">'+
+   '<div class="cd"><b id="cdH">--</b><span>hours</span></div>'+
+   '<div class="cd"><b id="cdM">--</b><span>minutes</span></div>'+
+   '<div class="cd"><b id="cdS">--</b><span>seconds</span></div>'+
+   '<div class="cd"><b>'+esc(S.tonight.start)+'</b><span>start time</span></div>'+
+   '</div>'+
+   '<div class="snacks">'+snacks+'</div>'+
+   '<div class="actions">'+
+   '<button class="btn btn-gold" type="button" onclick="CineKit.finishTonight()">We watched it \u2014 rate it</button>'+
+   '<button class="btn btn-ghost" type="button" onclick="CineKit.clearTonight()">Pick a different film</button>'+
+   '<label class="small" style="align-self:center;color:#cbb694">Start at <input type="time" id="startTime" value="'+esc(S.tonight.start)+'" onchange="CineKit.setStart(this.value)" style="background:#17100a;border:1px solid #4a3a24;color:var(--cream);border-radius:8px;padding:6px 8px"></label>'+
+   '</div></div></div>';
+  tickCountdown();
+}
+function tickCountdown(){
+  if(!S.tonight)return;
+  var h=$('cdH'),m=$('cdM'),s=$('cdS');if(!h||!m||!s)return;
+  var p=S.tonight.start.split(':');var now=new Date();
+  var t=new Date(now.getFullYear(),now.getMonth(),now.getDate(),+p[0],+p[1],0);
+  var diff=Math.floor((t-now)/1000);
+  if(diff<0){h.textContent='0';m.textContent='0';s.textContent='0';return;}
+  h.textContent=String(Math.floor(diff/3600)).padStart(2,'0');
+  m.textContent=String(Math.floor(diff%3600/60)).padStart(2,'0');
+  s.textContent=String(diff%60).padStart(2,'0');
+}
+function minsToStart(start,now){now=now||new Date();var p=start.split(':');var t=new Date(now.getFullYear(),now.getMonth(),now.getDate(),+p[0],+p[1],0);return Math.round((t-now)/60000);}
 <!-- @@NEXT@@ -->
