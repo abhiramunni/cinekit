@@ -399,4 +399,67 @@ footer .fbtns{display:flex;gap:8px;flex-wrap:wrap}
     </div>
   </div>
 </section>
+<!-- watchlist -->
+<section class="paper" id="watchlist">
+  <div class="wrap">
+    <div class="sec-h">
+      <div>
+        <div class="eyebrow">My watchlist</div>
+        <h2>Ticket stubs, not a spreadsheet.</h2>
+      </div>
+      <span class="sp"></span>
+      <p class="small">Every film you mean to watch, on its own stub. Tap a stub&rsquo;s buttons to move it along — Want to watch, Watching, Watched.</p>
+    </div>
+    <div class="toolbar">
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a7660" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="wlSearch" type="search" placeholder="Search title, language or who suggested it&hellip;" aria-label="Search your watchlist">
+      </div>
+      <select id="wlLang" aria-label="Filter by language">
+        <option value="any">All languages</option>
+        <option>Malayalam</option><option>Hindi</option><option>Tamil</option><option>English</option>
+      </select>
+      <button class="fchip on" type="button" data-f="all">All</button>
+      <button class="fchip" type="button" data-f="want">Want to watch</button>
+      <button class="fchip" type="button" data-f="watching">Watching</button>
+      <button class="fchip" type="button" data-f="watched">Watched</button>
+    </div>
+    <div class="stubs" id="stubGrid"></div>
+    <div class="empty hidden" id="stubEmpty">Nothing matches that filter. Try clearing the search, or add a film below.</div>
+    <div class="sheet">
+      <h3>Add a film to the list</h3>
+      <p class="sub">Heard about a film from a friend, a trailer, or this page? Put it on a stub before you forget it.</p>
+      <form id="addForm" onsubmit="return false;">
+        <div class="formgrid">
+          <div class="field"><label for="afTitle">Film title *</label><input id="afTitle" required maxlength="80" placeholder="e.g. Kumbalangi Nights"></div>
+          <div class="field"><label for="afLang">Language</label><select id="afLang"><option>Malayalam</option><option>Hindi</option><option>Tamil</option><option>English</option><option>Other</option></select></div>
+          <div class="field"><label for="afGenre">Genre</label><select id="afGenre"><option>Drama</option><option>Comedy-drama</option><option>Thriller</option><option>Drama-thriller</option><option>Action</option><option>Romance</option><option>Comedy</option><option>Horror</option><option>Other</option></select></div>
+          <div class="field"><label for="afRuntime">Runtime (minutes)</label><input id="afRuntime" type="number" min="30" max="400" placeholder="e.g. 135"></div>
+          <div class="field"><label for="afOtt">Where to watch</label><select id="afOtt"><option>Netflix</option><option>Prime Video</option><option>JioHotstar</option><option>ZEE5</option><option>SonyLIV</option><option>Sun NXT</option><option>BookMyShow Stream</option><option>In cinemas</option><option>Not sure yet</option></select></div>
+          <div class="field"><label for="afBy">Who suggested it?</label><input id="afBy" maxlength="40" placeholder="e.g. A friend, a trailer, CineKit"></div>
+          <div class="field full"><label for="afNote">One-line note (optional)</label><input id="afNote" maxlength="120" placeholder="e.g. The one with the four brothers"></div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-terra" type="submit" id="afSubmit">Add to my list</button>
+          <button class="btn btn-ghost" type="button" style="color:var(--ink);border-color:var(--line2)" onclick="CineKit.clearAddForm()">Clear</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- classics shelf -->
+<section class="paper" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-h">
+      <div>
+        <div class="eyebrow">The Malayalam classics shelf</div>
+        <h2>Ten films every Malayali should see.</h2>
+      </div>
+      <span class="sp"></span>
+      <p class="small">Hand-picked, not algorithm-picked. One tap adds a film to your list — and the reel can pick from it tonight.</p>
+    </div>
+    <div class="rail" id="classicRail"></div>
+  </div>
+</section>
 <!-- @@NEXT@@ -->
