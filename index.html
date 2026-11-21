@@ -565,4 +565,54 @@ footer .fbtns{display:flex;gap:8px;flex-wrap:wrap}
 </div>
 
 <div id="toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+'use strict';
+var KEY='cinekit-v1';
+var SEEN_KEY='cinekit-seen';
+
+/* ---------- data ---------- */
+var CLASSICS=[
+ {id:'c1',title:'Kireedam',year:1989,lang:'Malayalam',genre:'Drama',runtime:121,ott:'Prime Video',moods:['cry','think'],fam:false,why:'Mohanlal\u2019s heartbreak that still hurts.',hue:'linear-gradient(150deg,#8a3b1d,#5b2410)'},
+ {id:'c2',title:'Manichitrathazhu',year:1993,lang:'Malayalam',genre:'Thriller',runtime:169,ott:'JioHotstar',moods:['edge','think'],fam:false,why:'The gold standard of Malayalam horror.',hue:'linear-gradient(150deg,#3a2a17,#17100a)'},
+ {id:'c3',title:'Drishyam',year:2013,lang:'Malayalam',genre:'Thriller',runtime:160,ott:'JioHotstar',moods:['edge','think'],fam:false,why:'The perfect family-man thriller.',hue:'linear-gradient(150deg,#b4552d,#7a3418)'},
+ {id:'c4',title:'Premam',year:2015,lang:'Malayalam',genre:'Romance',runtime:156,ott:'JioHotstar',moods:['feel-good','laugh'],fam:true,why:'George\u2019s growing-up years, in three chapters.',hue:'linear-gradient(150deg,#c98a2e,#8a5a12)'},
+ {id:'c5',title:'Maheshinte Prathikaaram',year:2016,lang:'Malayalam',genre:'Drama',runtime:120,ott:'Prime Video',moods:['feel-good','cry'],fam:true,why:'A small revenge, told gently.',hue:'linear-gradient(150deg,#5f7a3a,#3c4d22)'},
+ {id:'c6',title:'Kumbalangi Nights',year:2019,lang:'Malayalam',genre:'Drama',runtime:135,ott:'SonyLIV',moods:['feel-good','cry'],fam:true,why:'Four brothers, one broken house, all heart.',hue:'linear-gradient(150deg,#cf6f42,#8a3b1d)'},
+ {id:'c7',title:'Joji',year:2021,lang:'Malayalam',genre:'Drama-thriller',runtime:113,ott:'Prime Video',moods:['edge','think'],fam:false,why:'Ambition curdles in a Kerala mansion.',hue:'linear-gradient(150deg,#4a3826,#241a10)'},
+ {id:'c8',title:'Bangalore Days',year:2014,lang:'Malayalam',genre:'Drama',runtime:172,ott:'JioHotstar',moods:['feel-good','laugh'],fam:true,why:'Three cousins, one city, endless warmth.',hue:'linear-gradient(150deg,#e2ab4a,#b4552d)'},
+ {id:'c9',title:'Ustad Hotel',year:2012,lang:'Malayalam',genre:'Drama',runtime:151,ott:'Prime Video',moods:['feel-good'],fam:true,why:'Food, family, and finding your way.',hue:'linear-gradient(150deg,#7a5a34,#4a3418)'},
+ {id:'c10',title:'Nna Thaan Case Kodu',year:2022,lang:'Malayalam',genre:'Comedy-drama',runtime:124,ott:'SonyLIV',moods:['laugh','think'],fam:true,why:'A courtroom comedy with a conscience.',hue:'linear-gradient(150deg,#a83c22,#6d2412)'}
+];
+var MOODS=[{id:'any',label:'Any mood'},{id:'feel-good',label:'Feel-good'},{id:'laugh',label:'Laugh out loud'},{id:'edge',label:'Edge of the seat'},{id:'cry',label:'A good cry'},{id:'think',label:'Make me think'}];
+var TIMES=[{id:'any',label:'Any length'},{id:'short',label:'Under 2 hours'},{id:'medium',label:'About 2 hours'},{id:'long',label:'3 hours, I\u2019m in'}];
+var LANGS=[{id:'any',label:'Any language'},{id:'Malayalam',label:'Malayalam'},{id:'Hindi',label:'Hindi'},{id:'Tamil',label:'Tamil'},{id:'English',label:'English'}];
+var WHOS=[{id:'any',label:'Doesn\u2019t matter'},{id:'me',label:'Just me'},{id:'friends',label:'With friends'},{id:'family',label:'With family'},{id:'date',label:'Date night'}];
+var OTT=[
+ {name:'Netflix',price:'from \u20B9149/mo',note:'Biggest catalogue; best for English films and Korean drama.'},
+ {name:'Prime Video',price:'\u20B9299/mo',note:'Included with Prime; a strong Malayalam shelf.'},
+ {name:'JioHotstar',price:'from \u20B9149/3 mo',note:'Cricket, big Hindi films and South Indian blockbusters.'},
+ {name:'ZEE5',price:'from \u20B999/mo',note:'Hindi and regional films, including Malayalam.'},
+ {name:'SonyLIV',price:'from \u20B9299/mo',note:'Sony films \u2014 and home to Kumbalangi Nights.'},
+ {name:'BookMyShow Stream',price:'rentals from \u20B949/film',note:'Pay per film. New releases land here first.'}
+];
+var GUIDES=[
+ {t:'Pick a film in 2 minutes',b:'Ask the four questions in the picker \u2014 feeling, time, language, who is watching \u2014 then roll once and commit. The second roll is where the evening goes to die.'},
+ {t:'Subtitles or dubbing?',b:'Watch in the original language with subtitles. You keep the actor\u2019s real performance, and you pick up words along the way. Dubbing is fine for a first watch with kids.'},
+ {t:'The 20-minute rule',b:'Give any film twenty honest minutes. If you have checked your phone twice by then, switch \u2014 life is too short for a film you are enduring.'},
+ {t:'Family movie night, no fights',b:'Rotate who picks each week, and everyone gets one veto. The picker\u2019s choice stands \u2014 even if it is a film you have already seen twice.'},
+ {t:'Theatre or home?',b:'Go to the theatre for spectacle \u2014 big action, big sound, a film everyone will talk about. Stay home for slow, quiet films; the sofa forgives a pause button.'},
+ {t:'What \u201COTT\u201D actually means',b:'OTT is just streaming apps \u2014 Netflix, Prime Video, JioHotstar and the rest. Some films are included in the subscription, some cost extra to rent. The stub always tells you which.'}
+];
+var SEED_FILMS=[
+ {id:'f1',title:'Kumbalangi Nights',lang:'Malayalam',genre:'Drama',runtime:135,ott:'SonyLIV',by:'An old friend',note:'Four brothers, one broken house.',status:'want',rating:0,moods:['feel-good','cry'],fam:true,sample:true},
+ {id:'f2',title:'Drishyam',lang:'Malayalam',genre:'Thriller',runtime:160,ott:'JioHotstar',by:'Everyone, eventually',note:'The perfect family-man thriller.',status:'want',rating:0,moods:['edge','think'],fam:false,sample:true},
+ {id:'f3',title:'3 Idiots',lang:'Hindi',genre:'Comedy-drama',runtime:171,ott:'Netflix',by:'College days',note:'Watched it again \u2014 still holds up.',status:'watched',rating:5,moods:['feel-good','laugh'],fam:true,sample:true,watchedDate:'2026-11-15'},
+ {id:'f4',title:'Joji',lang:'Malayalam',genre:'Drama-thriller',runtime:113,ott:'Prime Video',by:'A review',note:'Ambition curdles quietly.',status:'watched',rating:4,moods:['edge','think'],fam:false,sample:true,watchedDate:'2026-11-12'},
+ {id:'f5',title:'The Shawshank Redemption',lang:'English',genre:'Drama',runtime:142,ott:'Netflix',by:'Every best-films list',note:'',status:'want',rating:0,moods:['feel-good','think'],fam:true,sample:true},
+ {id:'f6',title:'Vikram',lang:'Tamil',genre:'Action',runtime:175,ott:'JioHotstar',by:'A cousin',note:'Watch it loud.',status:'watching',rating:0,moods:['edge'],fam:false,sample:true},
+ {id:'f7',title:'Bangalore Days',lang:'Malayalam',genre:'Drama',runtime:172,ott:'JioHotstar',by:'A rainy day',note:'Three cousins, one city.',status:'watched',rating:5,moods:['feel-good','laugh'],fam:true,sample:true,watchedDate:'2026-11-08'},
+ {id:'f8',title:'O.M Chapter 1',lang:'Tamil',genre:'Action',runtime:null,ott:'In cinemas',by:'This week\u2019s buzz',note:'Dhanush, Mammootty, Sai Pallavi \u2014 in cinemas now.',status:'want',rating:0,moods:['edge'],fam:false,sample:true},
+ {id:'f9',title:'The Lunchbox',lang:'Hindi',genre:'Drama',runtime:104,ott:'Netflix',by:'A quiet evening',note:'Two strangers, one dabba.',status:'want',rating:0,moods:['feel-good','think'],fam:true,sample:true}
+];
 <!-- @@NEXT@@ -->
