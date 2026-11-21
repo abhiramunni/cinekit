@@ -18,7 +18,7 @@ Verified live 21 Nov 2026: intro, hero, tonight's screening, picker, watchlist, 
 
 ## Details
 
-- Single self-contained `index.html` (photos embedded as base64; the two WebP originals are in `assets/`).
+- Single `index.html` plus two photo files at the repo root (`cinekit-hero.webp`, `cinekit-flatlay.webp`), referenced by relative filenames.
 - Warm editorial design: espresso auditorium, ivory paper, amber/gold/terracotta marquee. Fraunces + Inter.
 - 4-second cinematic marquee intro with tap-to-skip (quick version on return visits) and a 3-step onboarding coach.
 - No backend, no signup. Works offline once loaded (fonts need a connection on first load).
