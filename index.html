@@ -615,4 +615,28 @@ var SEED_FILMS=[
  {id:'f8',title:'O.M Chapter 1',lang:'Tamil',genre:'Action',runtime:null,ott:'In cinemas',by:'This week\u2019s buzz',note:'Dhanush, Mammootty, Sai Pallavi \u2014 in cinemas now.',status:'want',rating:0,moods:['edge'],fam:false,sample:true},
  {id:'f9',title:'The Lunchbox',lang:'Hindi',genre:'Drama',runtime:104,ott:'Netflix',by:'A quiet evening',note:'Two strangers, one dabba.',status:'want',rating:0,moods:['feel-good','think'],fam:true,sample:true}
 ];
+var SNACKS=[{id:'popcorn',label:'Popcorn ready'},{id:'chai',label:'Filter coffee / chai'},{id:'blanket',label:'Blankets out'},{id:'silent',label:'Phones on silent'}];
+
+/* ---------- state ---------- */
+function freshState(){return {films:JSON.parse(JSON.stringify(SEED_FILMS)),tonight:null};}
+var S;
+try{var raw=window.localStorage.getItem(KEY);S=raw?JSON.parse(raw):null;}catch(e){S=null;}
+if(!S||!Array.isArray(S.films)||!S.films.length){S=freshState();}
+if(!('tonight' in S)){S.tonight=null;}
+function save(){try{window.localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+/* ---------- utils ---------- */
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function todayStr(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function parseDate(s){var p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2]);}
+function fmtDate(s){if(!s)return '';var d=parseDate(s);var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return d.getDate()+' '+M[d.getMonth()]+' '+d.getFullYear();}
+function fmtRuntime(m){if(m==null||m==='')return '\u2014';m=+m;if(m<60)return m+'m';return Math.floor(m/60)+'h '+String(m%60).padStart(2,'0')+'m';}
+function fmtHours(min){if(!min)return '0h 00m';return Math.floor(min/60)+'h '+String(min%60).padStart(2,'0')+'m';}
+function uid(){return 'u'+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36);}
+function toast(msg){var t=$('toast');if(!t)return;t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('show');},2600);}
+function safeScroll(el){try{if(el&&el.scrollIntoView)el.scrollIntoView({behavior:'smooth',block:'start'});}catch(e){}}
+function scrollToId(id){var el=document.getElementById(id);if(el)safeScroll(el);}
+function timeBucket(m){if(m==null||m==='')return 'any';m=+m;if(m<120)return 'short';if(m<=160)return 'medium';return 'long';}
+function monthKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 <!-- @@NEXT@@ -->
