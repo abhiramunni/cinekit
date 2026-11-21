@@ -993,4 +993,82 @@ function eraseAll(){
   S=freshState();S.films=[];save();renderAll();
   toast('Everything erased. A fresh, empty list.');
 }
+/* ---------- coach ---------- */
+var COACH=[
+ {t:'Pick tonight\u2019s film',x:'Answer four quick questions \u2014 feeling, time, language, who is watching \u2014 and CineKit rolls the reel on a film from your own list.'},
+ {t:'Your list, your rules',x:'Films live on ticket stubs. Move them from Want to watch to Watching to Watched, and tap the stars to rate them.'},
+ {t:'Log it and keep the night',x:'Every finished film lands in your movie diary with its stars, so November\u2019s film nights add up to something you can see.'}
+];
+var coachStep=0;
+function startCoach(){
+  coachStep=0;showCoach();
+}
+function showCoach(){
+  var box=$('coachBox');if(!box)return;
+  $('coachTitle').textContent=COACH[coachStep].t;
+  $('coachText').textContent=COACH[coachStep].x;
+  $('coachNext').textContent=coachStep===COACH.length-1?'Done':'Next';
+  var dots=$('coachDots').children;
+  for(var i=0;i<dots.length;i++)dots[i].classList.toggle('on',i===coachStep);
+  box.classList.remove('hidden');
+}
+function coachNext(){
+  if(coachStep<COACH.length-1){coachStep++;showCoach();}
+  else{coachSkip();}
+}
+function coachSkip(){
+  $('coachBox').classList.add('hidden');
+  try{window.localStorage.setItem('cinekit-coach','1');}catch(e){}
+}
+
+/* ---------- intro ---------- */
+function skipIntro(){
+  var el=$('intro');if(!el)return;
+  el.classList.add('gone');
+  setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},700);
+}
+function bootIntro(){
+  var seen=false;try{seen=!!window.localStorage.getItem(SEEN_KEY);}catch(e){}
+  var el=$('intro');if(!el)return;
+  if(seen)el.classList.add('quick');
+  try{window.localStorage.setItem(SEEN_KEY,'1');}catch(e){}
+  var done=false;
+  function fin(){if(done)return;done=true;skipIntro();}
+  setTimeout(fin,seen?1200:3800);
+  var sk=$('introSkip');if(sk)sk.addEventListener('click',fin);
+  el.addEventListener('click',function(ev){if(ev.target===el)fin();});
+}
+
+/* ---------- wiring ---------- */
+function wire(){
+  var s=$('wlSearch');
+  if(s)s.addEventListener('input',function(){WL.q=s.value;renderWatchlist();});
+  var l=$('wlLang');
+  if(l)l.addEventListener('change',function(){WL.lang=l.value;renderWatchlist();});
+  document.querySelectorAll('.fchip').forEach(function(b){b.addEventListener('click',function(){setWlFilter(b.getAttribute('data-f'));});});
+  var f=$('addForm');
+  if(f)f.addEventListener('submit',function(){
+    var t=$('afTitle').value.trim();
+    if(!t){toast('Give the film a title first.');return;}
+    var rt=parseInt($('afRuntime').value,10);
+    var ok=addFilm({title:t,lang:$('afLang').value,genre:$('afGenre').value,runtime:isNaN(rt)?null:rt,ott:$('afOtt').value,by:$('afBy').value.trim(),note:$('afNote').value.trim()});
+    if(ok){clearAddForm();toast('\u201C'+t+'\u201D is on your list.');scrollToId('watchlist');}
+  });
+  var nx=$('coachNext');if(nx)nx.addEventListener('click',coachNext);
+  var sk2=$('coachSkip');if(sk2)sk2.addEventListener('click',coachSkip);
+  var ov=$('rateOverlay');if(ov)ov.addEventListener('click',function(ev){if(ev.target===ov)closeRate();});
+  document.addEventListener('keydown',function(ev){if(ev.key==='Escape')closeRate();});
+}
+
+/* ---------- render all + boot ---------- */
+function renderAll(){
+  renderStats();renderTonight();renderWatchlist();renderClassics();renderLog();drawChart();renderOtt();renderGuides();renderPills();
+}
+function boot(){
+  wire();renderAll();bootIntro();
+  setInterval(tickCountdown,1000);
+  var coachDone=false;try{coachDone=!!window.localStorage.getItem('cinekit-coach');}catch(e){}
+  if(!coachDone)setTimeout(startCoach,4200);
+}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',boot);}else{boot();}
 <!-- @@NEXT@@ -->
