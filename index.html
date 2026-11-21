@@ -707,4 +707,109 @@ function tickCountdown(){
   s.textContent=String(diff%60).padStart(2,'0');
 }
 function minsToStart(start,now){now=now||new Date();var p=start.split(':');var t=new Date(now.getFullYear(),now.getMonth(),now.getDate(),+p[0],+p[1],0);return Math.round((t-now)/60000);}
+/* ---------- picker ---------- */
+var PICK={mood:'any',time:'any',lang:'any',who:'any'};
+function poolItems(){
+  var items=[];
+  S.films.forEach(function(f){if(f.status==='want')items.push({kind:'list',film:f});});
+  CLASSICS.forEach(function(c){if(!onListTitle(c.title))items.push({kind:'classic',film:c});});
+  return items;
+}
+function filterPool(p){
+  p=p||PICK;
+  return poolItems().filter(function(it){
+    var f=it.film;
+    if(p.mood&&p.mood!=='any'&&(!f.moods||f.moods.indexOf(p.mood)<0))return false;
+    if(p.time&&p.time!=='any'&&timeBucket(f.runtime)!==p.time)return false;
+    if(p.lang&&p.lang!=='any'&&f.lang!==p.lang)return false;
+    if(p.who==='family'&&!f.fam)return false;
+    return true;
+  });
+}
+function pickFilms(p,double){
+  var pool=filterPool(p);
+  if(!pool.length)return [];
+  var n=double?Math.min(2,pool.length):1;
+  var out=[];var bag=pool.slice();
+  while(out.length<n&&bag.length){var i=Math.floor(Math.random()*bag.length);out.push(bag.splice(i,1)[0]);}
+  return out;
+}
+function renderPills(){
+  function group(el,opts,key){
+    var box=$(el);if(!box)return;
+    box.innerHTML=opts.map(function(o){return '<button type="button" class="pill'+(PICK[key]===o.id?' on':'')+'" data-v="'+o.id+'" onclick="CineKit.setPick(\''+key+'\',\''+o.id+'\')">'+esc(o.label)+'</button>';}).join('');
+  }
+  group('moodPills',MOODS,'mood');group('timePills',TIMES,'time');group('langPills',LANGS,'lang');group('whoPills',WHOS,'who');
+}
+function setPick(key,val){PICK[key]=val;renderPills();}
+function whyLine(it){
+  var f=it.film;var bits=[];
+  if(f.runtime)bits.push(fmtRuntime(f.runtime));
+  if(f.genre)bits.push(f.genre);
+  if(f.lang)bits.push(f.lang);
+  var mood=PICK.mood!=='any'?MOODS.filter(function(m){return m.id===PICK.mood;})[0].label.toLowerCase():'';
+  var who=PICK.who==='family'?'for the whole family':PICK.who==='friends'?'for a friends\u2019 night':PICK.who==='date'?'for date night':PICK.who==='me'?'for a solo night':'';
+  var s=bits.join(' \u00B7 ');
+  if(mood)s+=(s?' \u2014 ':'')+'fits your '+mood+' mood';
+  if(who)s+=(mood?' ':'')+who;
+  if(it.kind==='classic')s+=(s?'. ':'')+'From the Malayalam classics shelf';
+  return s||'A solid pick from your list.';
+}
+var rolling=false;
+function rollReel(){
+  if(rolling)return;
+  var box=$('reelBox');var dbl=$('dblToggle')&&$('dblToggle').checked;
+  var pool=filterPool();
+  if(!pool.length){
+    box.innerHTML='<div class="slot">Nothing matches those four answers.<small>Try widening the time or the language \u2014 or add more films to your list.</small></div>';
+    return;
+  }
+  rolling=true;box.classList.add('cycling');
+  var picks=pickFilms(PICK,dbl);
+  var i=0;var total=14;
+  var timer=setInterval(function(){
+    var it=pool[Math.floor(Math.random()*pool.length)];
+    box.innerHTML='<div class="slot">'+esc(it.film.title)+'<small>'+esc(it.film.lang||'')+(it.film.runtime?' \u00B7 '+fmtRuntime(it.film.runtime):'')+'</small></div>';
+    i++;
+    if(i>=total){
+      clearInterval(timer);rolling=false;box.classList.remove('cycling');
+      showPicks(picks);
+    }
+  },90);
+}
+function showPicks(picks){
+  var box=$('reelBox');
+  if(picks.length===1){
+    var it=picks[0];
+    box.innerHTML='<div class="slot">'+esc(it.film.title)+'<small>'+esc(whyLine(it))+'</small></div>'+
+    '<div class="rbtns"><button class="btn btn-gold" type="button" onclick="CineKit.lockTonight(\''+it.kind+'\',\''+it.film.id+'\')">Tonight, this one</button>'+
+    '<button class="btn btn-ghost" type="button" onclick="CineKit.rollReel()">Roll again</button>'+
+    (it.kind==='classic'?'<button class="btn btn-ghost" type="button" onclick="CineKit.addClassic(\''+it.film.id+'\')">Add to my list</button>':'')+'</div>';
+    box._pick=it;
+  }else{
+    var html='<div class="slot">'+esc(picks[0].film.title)+' <span style="color:var(--gold2)">+</span> '+esc(picks[1].film.title)+'<small>Double feature \u2014 '+esc(whyLine(picks[0]))+' \u00B7 then '+esc(whyLine(picks[1]))+'</small></div>'+
+    '<div class="rbtns"><button class="btn btn-gold" type="button" onclick="CineKit.lockTonight(\''+picks[0].kind+'\',\''+picks[0].film.id+'\')">Tonight: '+esc(picks[0].film.title)+'</button>'+
+    '<button class="btn btn-ghost" type="button" onclick="CineKit.rollReel()">Roll again</button></div>';
+    box.innerHTML=html;box._pick=picks[0];
+  }
+}
+function lockTonight(kind,id){
+  var f=kind==='classic'?classicById(id):filmById(id);
+  if(!f)return;
+  if(kind==='classic'&&!onListTitle(f.title)){
+    S.films.push({id:uid(),title:f.title,lang:f.lang,genre:f.genre,runtime:f.runtime,ott:f.ott,by:'Classics shelf',note:f.why,status:'want',rating:0,moods:f.moods.slice(),fam:f.fam,sample:false});
+  }
+  var film=filmById(id)||S.films.filter(function(x){return x.title===f.title;})[0];
+  S.tonight={filmId:film.id,title:film.title,start:'21:00',date:todayStr(),why:whyLine({kind:kind,film:f}),snacks:{popcorn:false,chai:false,blanket:false,silent:false}};
+  save();renderAll();scrollToId('tonight');
+  toast('\u201C'+film.title+'\u201D is on the marquee for tonight.');
+}
+function toggleSnack(id){if(!S.tonight)return;S.tonight.snacks[id]=!S.tonight.snacks[id];save();renderTonight();}
+function setStart(v){if(!S.tonight||!v)return;S.tonight.start=v;save();tickCountdown();}
+function clearTonight(){S.tonight=null;save();renderAll();toast('Marquee cleared \u2014 roll the reel again.');}
+function finishTonight(){
+  if(!S.tonight)return;
+  var f=filmById(S.tonight.filmId);if(!f){S.tonight=null;save();renderAll();return;}
+  S.tonight=null;save();openRate(f.id);
+}
 <!-- @@NEXT@@ -->
