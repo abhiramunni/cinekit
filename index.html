@@ -812,4 +812,109 @@ function finishTonight(){
   var f=filmById(S.tonight.filmId);if(!f){S.tonight=null;save();renderAll();return;}
   S.tonight=null;save();openRate(f.id);
 }
+/* ---------- watchlist ---------- */
+var WL={f:'all',lang:'any',q:''};
+function statusLabel(s){return s==='want'?'Want to watch':s==='watching'?'Watching':'Watched';}
+function statusTag(s){return '<span class="tag '+s+'">'+statusLabel(s)+'</span>';}
+function starSvg(lit,size){
+  size=size||19;
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17l-5.7 3.1 1.2-6.4L2.8 9.3l6.4-.8z" fill="'+(lit?'#c98a2e':'none')+'" stroke="'+(lit?'#c98a2e':'#d8c6a8')+'" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+}
+function starRow(f){
+  var h='<span class="stars" role="group" aria-label="Rate '+esc(f.title)+'">';
+  for(var i=1;i<=5;i++){h+='<button type="button" class="'+(f.rating>=i?'lit':'')+'" onclick="CineKit.rateFilm(\''+f.id+'\','+i+')" aria-label="'+i+' star'+(i>1?'s':'')+'">'+starSvg(f.rating>=i)+'</button>';}
+  return h+'</span>';
+}
+function renderWatchlist(){
+  var grid=$('stubGrid');if(!grid)return;
+  var q=WL.q.trim().toLowerCase();
+  var list=S.films.filter(function(f){
+    if(WL.f!=='all'&&f.status!==WL.f)return false;
+    if(WL.lang!=='any'&&f.lang!==WL.lang)return false;
+    if(q&&(f.title+' '+f.lang+' '+(f.by||'')+' '+(f.genre||'')).toLowerCase().indexOf(q)<0)return false;
+    return true;
+  });
+  $('stubEmpty').classList.toggle('hidden',list.length>0);
+  grid.innerHTML=list.map(function(f){
+    var next=f.status==='want'?'<button class="linkbtn" type="button" onclick="CineKit.setStatus(\''+f.id+'\',\'watching\')">Start watching</button>':f.status==='watching'?'<button class="linkbtn" type="button" onclick="CineKit.openRate(\''+f.id+'\')">Mark watched</button>':'';
+    return '<article class="stub">'+
+    '<div class="row1"><h3>'+esc(f.title)+'</h3>'+statusTag(f.status)+'</div>'+
+    '<div class="meta">'+esc(f.lang)+' \u00B7 '+esc(f.genre)+' \u00B7 '+fmtRuntime(f.runtime)+' \u00B7 '+esc(f.ott)+'</div>'+
+    (f.note?'<div class="note">\u201C'+esc(f.note)+'\u201D</div>':'')+
+    '<div class="tags"><span class="tag ott">'+esc(f.ott)+'</span><span class="tag">Suggested by '+esc(f.by||'you')+'</span>'+(f.sample?'<span class="tag">Sample</span>':'')+'</div>'+
+    '<div class="foot">'+(f.status==='watched'?starRow(f):'')+next+
+    '<button class="linkbtn" type="button" onclick="CineKit.lockTonight(\'list\',\''+f.id+'\')">Tonight</button>'+
+    '<button class="linkbtn grey" type="button" onclick="CineKit.removeFilm(\''+f.id+'\')">Remove</button>'+
+    '<span class="admit">ADMIT ONE</span></div></article>';
+  }).join('');
+}
+function setStatus(id,st){
+  var f=filmById(id);if(!f)return;
+  if(st==='watched'){openRate(id);return;}
+  f.status=st;if(st!=='watched'){f.rating=0;f.watchedDate=null;}
+  save();renderAll();
+}
+function removeFilm(id){
+  var f=filmById(id);if(!f)return;
+  if(S.tonight&&S.tonight.filmId===id)S.tonight=null;
+  S.films=S.films.filter(function(x){return x.id!==id;});
+  save();renderAll();toast('\u201C'+f.title+'\u201D removed from your list.');
+}
+function addFilm(data){
+  if(!data.title)return false;
+  S.films.unshift({id:uid(),title:data.title,lang:data.lang||'Malayalam',genre:data.genre||'Drama',runtime:data.runtime||null,ott:data.ott||'Not sure yet',by:data.by||'You',note:data.note||'',status:'want',rating:0,moods:['feel-good'],fam:true,sample:false});
+  save();renderAll();return true;
+}
+function clearAddForm(){var f=$('addForm');if(f)f.reset();}
+function setWlFilter(v){WL.f=v;document.querySelectorAll('.fchip').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-f')===v);});renderWatchlist();}
+
+/* ---------- rating modal ---------- */
+var rateId=null;var rateStars=0;
+function openRate(id){
+  var f=filmById(id);if(!f)return;
+  rateId=id;rateStars=f.rating||0;
+  $('rateTitle').textContent='How was \u201C'+f.title+'\u201D?';
+  $('rateNote').value=f.note||'';
+  drawRateStars();$('rateOverlay').classList.remove('hidden');
+}
+function drawRateStars(){
+  var h='';
+  for(var i=1;i<=5;i++){h+='<button type="button" style="background:none;border:none;padding:2px;line-height:1" onclick="CineKit.setRateStars('+i+')" aria-label="'+i+' stars">'+starSvg(rateStars>=i,30)+'</button>';}
+  $('rateStars').innerHTML=h;
+}
+function setRateStars(n){rateStars=n;drawRateStars();}
+function closeRate(){rateId=null;$('rateOverlay').classList.add('hidden');}
+function saveRating(){
+  if(!rateId){closeRate();return;}
+  var f=filmById(rateId);if(!f){closeRate();return;}
+  f.status='watched';f.rating=rateStars||5;f.watchedDate=todayStr();
+  var note=$('rateNote').value.trim();if(note)f.note=note;
+  save();closeRate();renderAll();
+  toast('\u201C'+f.title+'\u201D logged \u2014 '+f.rating+' star'+(f.rating===1?'':'s')+'.');
+}
+function rateFilm(id,n){
+  var f=filmById(id);if(!f)return;
+  if(f.status!=='watched'){openRate(id);return;}
+  f.rating=n;save();renderAll();
+}
+
+/* ---------- classics rail ---------- */
+function renderClassics(){
+  var rail=$('classicRail');if(!rail)return;
+  rail.innerHTML=CLASSICS.map(function(c){
+    var on=onListTitle(c.title);
+    return '<article class="poster-card">'+
+    '<div class="art" style="background:'+c.hue+'"><span class="letter">'+esc(c.title.charAt(0))+'</span><span class="yr">'+c.year+' &middot; '+esc(c.lang)+'</span></div>'+
+    '<div class="body"><h3>'+esc(c.title)+'</h3><p>'+esc(c.why)+'</p>'+
+    '<div class="meta small muted">'+esc(c.genre)+' &middot; '+fmtRuntime(c.runtime)+' &middot; '+esc(c.ott)+'</div>'+
+    (on?'<button class="btn btn-ghost btn-sm" type="button" style="color:var(--ink);border-color:var(--line2)" disabled>On your list</button>'
+       :'<button class="btn btn-terra btn-sm" type="button" onclick="CineKit.addClassic(\''+c.id+'\')">Add to my list</button>')+
+    '</div></article>';
+  }).join('');
+}
+function addClassic(id){
+  var c=classicById(id);if(!c||onListTitle(c.title))return;
+  S.films.push({id:uid(),title:c.title,lang:c.lang,genre:c.genre,runtime:c.runtime,ott:c.ott,by:'Classics shelf',note:c.why,status:'want',rating:0,moods:c.moods.slice(),fam:c.fam,sample:false});
+  save();renderAll();toast('\u201C'+c.title+'\u201D added to your list.');
+}
 <!-- @@NEXT@@ -->
