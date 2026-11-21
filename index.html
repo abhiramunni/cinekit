@@ -304,4 +304,99 @@ footer .fbtns{display:flex;gap:8px;flex-wrap:wrap}
     </div>
   </div>
 </div>
+<!-- now showing -->
+<section class="dark">
+  <div class="wrap">
+    <div class="sec-h">
+      <div>
+        <div class="eyebrow">This week&rsquo;s buzz</div>
+        <h2>Now showing &amp; new to stream</h2>
+      </div>
+      <span class="sp"></span>
+      <p class="small muted">What everyone is talking about this week. Buzz, not bookings — check showtimes and streaming pages before you go.</p>
+    </div>
+    <div class="buzz">
+      <article>
+        <div class="tagline">In cinemas &middot; from 20 Nov</div>
+        <h3>O.M Chapter 1</h3>
+        <p>Dhanush&rsquo;s new film, co-starring Mammootty and Sai Pallavi, opened with a reported &rupee;19.75 crore day one — his biggest global opener.</p>
+        <div class="meta">Tamil &middot; Action &middot; In cinemas now</div>
+      </article>
+      <article>
+        <div class="tagline">In cinemas &middot; week 3</div>
+        <h3>Ramayana</h3>
+        <p>Nitesh Tiwari&rsquo;s epic has crossed &rupee;1,000 crore in India alone in 14 days — only the sixth Indian film ever to do it.</p>
+        <div class="meta">Hindi &middot; Epic &middot; In cinemas now</div>
+      </article>
+      <article>
+        <div class="tagline">Streaming &middot; from 20 Nov</div>
+        <h3>The Vvaan</h3>
+        <p>Sidharth Malhotra and Tamannaah Bhatia&rsquo;s folklore thriller reaches Prime Video, almost two months after its theatrical run.</p>
+        <div class="meta">Hindi &middot; Thriller &middot; Prime Video</div>
+      </article>
+      <article>
+        <div class="tagline">Coming soon &middot; 24 Dec</div>
+        <h3>King</h3>
+        <p>Shah Rukh Khan and Deepika Padukone&rsquo;s big Christmas release. The first song has already crossed 100 million plays.</p>
+        <div class="meta">Hindi &middot; Action &middot; Trailer 14 Dec</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- tonight's screening -->
+<section class="dark2" id="tonight">
+  <div class="wrap">
+    <div class="sec-h">
+      <div>
+        <div class="eyebrow">Tonight&rsquo;s screening</div>
+        <h2>The stage is set. The film is&hellip;</h2>
+      </div>
+      <span class="sp"></span>
+      <p class="small muted">Lock a film in, set a start time, tick off the snacks — CineKit counts down to lights-down.</p>
+    </div>
+    <div class="stage" id="stageBox"></div>
+  </div>
+</section>
+
+<!-- picker -->
+<section class="dark" id="picker">
+  <div class="wrap">
+    <div class="sec-h">
+      <div>
+        <div class="eyebrow">Pick for tonight</div>
+        <h2>Four questions. One film.</h2>
+      </div>
+      <span class="sp"></span>
+      <p class="small muted">The reel only spins through films on your list and the classics shelf — nothing you don&rsquo;t already want to watch.</p>
+    </div>
+    <div class="picker">
+      <div class="pick-grid">
+        <div>
+          <h4>1 &middot; How should it feel?</h4>
+          <div class="pills" id="moodPills"></div>
+        </div>
+        <div>
+          <h4>2 &middot; How much time?</h4>
+          <div class="pills" id="timePills"></div>
+        </div>
+        <div>
+          <h4>3 &middot; Which language?</h4>
+          <div class="pills" id="langPills"></div>
+        </div>
+        <div>
+          <h4>4 &middot; Who&rsquo;s watching?</h4>
+          <div class="pills" id="whoPills"></div>
+        </div>
+      </div>
+      <div class="rollrow">
+        <button class="btn btn-gold" type="button" id="rollBtn" onclick="CineKit.rollReel()">Roll the reel</button>
+        <label class="switch"><input type="checkbox" id="dblToggle"> Double feature — pick two films back to back</label>
+      </div>
+      <div class="reel" id="reelBox">
+        <div class="slot">Your film appears here.<small>Answer the four questions above, then roll.</small></div>
+      </div>
+    </div>
+  </div>
+</section>
 <!-- @@NEXT@@ -->
