@@ -462,4 +462,107 @@ footer .fbtns{display:flex;gap:8px;flex-wrap:wrap}
     <div class="rail" id="classicRail"></div>
   </div>
 </section>
+<!-- stats & watched log -->
+<section class="dark" id="diary">
+  <div class="wrap">
+    <div class="sec-h">
+      <div>
+        <div class="eyebrow">Your movie diary</div>
+        <h2>November at the movies.</h2>
+      </div>
+      <span class="sp"></span>
+      <p class="small muted">Every film you finish lands here, with your stars. The chart shows the last 14 days, so a quiet week is honest, not hidden.</p>
+    </div>
+    <div class="statgrid">
+      <div class="tile"><b id="dgFilms">3</b><span>Films in Nov</span></div>
+      <div class="tile"><b id="dgHours">7h 36m</b><span>Hours watched</span></div>
+      <div class="tile"><b id="dgAvg">4.7</b><span>Average rating</span></div>
+      <div class="tile"><b id="dgGenre">Drama</b><span>Top genre</span></div>
+    </div>
+    <div class="split">
+      <div class="panel">
+        <h3>Last 14 days, in minutes</h3>
+        <p class="sub">Bars are films finished that day. Tap a watched stub&rsquo;s stars to change a rating — the numbers update at once.</p>
+        <canvas id="weekChart" width="640" height="220" style="width:100%;height:auto" role="img" aria-label="Bar chart of minutes watched over the last 14 days"></canvas>
+      </div>
+      <div class="panel">
+        <h3>Watched log</h3>
+        <p class="sub">Newest first. Your note stays with the film.</p>
+        <div class="loglist" id="logList"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OTT guide -->
+<section class="paper">
+  <div class="wrap">
+    <div class="sec-h">
+      <div>
+        <div class="eyebrow">Where to watch</div>
+        <h2>One subscription too many?</h2>
+      </div>
+      <span class="sp"></span>
+      <p class="small">Indicative prices, November 2026 — check the app before you pay. If a platform only holds one film you want, rent it instead.</p>
+    </div>
+    <div class="ottgrid" id="ottGrid"></div>
+    <div class="photoband">
+      <img src="{{FLATLAY_IMG}}" alt="Popcorn, movie tickets, a brass lamp and a blanket on a wooden table">
+      <div class="cap">
+        <h3>The 20-minute rule</h3>
+        <p>Give any film twenty honest minutes. If you have checked your phone twice by then, switch — life is too short for a film you are enduring.</p>
+      </div>
+    </div>
+    <div class="sec-h" style="margin-top:44px">
+      <div>
+        <div class="eyebrow">Good to know</div>
+        <h2>Six things, in plain words.</h2>
+      </div>
+    </div>
+    <div class="guides" id="guideGrid"></div>
+  </div>
+</section>
+
+<!-- footer -->
+<footer>
+  <div class="wrap fgrid">
+    <div>
+      <div class="eyebrow">CineKit</div>
+      <p style="margin-top:8px">Your list, your ratings, your movie nights — all saved only on this device. No account, no tracking, no spoilers. Film details and prices are indicative; check the cinema or streaming app before you pay or travel.</p>
+    </div>
+    <div class="fbtns">
+      <button class="btn btn-ghost btn-sm" type="button" onclick="CineKit.copySummary()">Copy my movie summary</button>
+      <button class="btn btn-ghost btn-sm" type="button" onclick="CineKit.removeSamples()">Remove samples</button>
+      <button class="btn btn-ghost btn-sm" type="button" onclick="CineKit.eraseAll()">Erase everything</button>
+    </div>
+  </div>
+</footer>
+
+<!-- rating modal -->
+<div class="overlay hidden" id="rateOverlay" role="dialog" aria-modal="true" aria-label="Rate the film">
+  <div class="modal">
+    <button class="x" type="button" onclick="CineKit.closeRate()" aria-label="Close">&times;</button>
+    <h3 id="rateTitle">How was it?</h3>
+    <p class="sub" id="rateSub">Tap the stars. Your rating lands in the diary at once.</p>
+    <div class="stars" id="rateStars" style="font-size:30px"></div>
+    <div class="field" style="margin-top:14px"><label for="rateNote">One-line note (optional)</label><input id="rateNote" maxlength="120" placeholder="e.g. The interval twist got me"></div>
+    <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-gold" type="button" onclick="CineKit.saveRating()">Save rating</button>
+      <button class="btn btn-ghost" type="button" style="color:var(--ink);border-color:var(--line2)" onclick="CineKit.closeRate()">Not now</button>
+    </div>
+  </div>
+</div>
+
+<!-- coach -->
+<div class="coach hidden" id="coachBox" role="dialog" aria-label="Quick tour">
+  <h3 id="coachTitle">Welcome to CineKit</h3>
+  <p id="coachText"></p>
+  <div class="row">
+    <button class="btn btn-terra btn-sm" type="button" id="coachNext">Next</button>
+    <button class="linkbtn grey" type="button" id="coachSkip">Skip tour</button>
+    <span class="dots" id="coachDots"><i class="on"></i><i></i><i></i></span>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
 <!-- @@NEXT@@ -->
